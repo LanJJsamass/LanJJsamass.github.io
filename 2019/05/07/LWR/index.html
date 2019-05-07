@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.8.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!--Description-->
+    
+        <meta name="description" content="1、问题的由来：在有些实际问题中我们有可能会遇到并不是线性模型需要我们进行回归分析，我们之前只学过线性模型进行回归分析。然而，我们有可能面对的不是线性模型，这就需要更加丰富的模型进行回归分析。当面对一个非线性模型的时候，我们本能想到的是通过添加一些非线性的特征（多项式），进而表征更高维度的特征，同时">
+    
+
+    <!--Author-->
+    
+        <meta name="author" content="YWP">
+    
+
+    <!-- Title -->
+    
+    <title>局部权重回归（LWR） | Hexo</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="//cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+
+    <!-- Custom Fonts -->
+    <link href="//cdn.bootcss.com/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+    <link href="//fonts.googleapis.com/css?family=Noto+Serif:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+
+    <!-- Content -->
+    <section class="article-container">
+<!-- Back Home -->
+<a class="nav-back" href="/">
+    <i class="fa fa-puzzle-piece"></i>
+</a>
+
+<!-- Page Header -->
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <h1>局部权重回归（LWR）</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <!-- Post Main Content -->
+            <div class="post-content col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <h1 id="1、问题的由来："><a href="#1、问题的由来：" class="headerlink" title="1、问题的由来："></a>1、问题的由来：</h1><p>在有些实际问题中我们有可能会遇到并不是线性模型需要我们进行回归分析，我们之前只学过线性模型进行回归分析。然而，我们有可能面对的不是线性模型，这就需要更加丰富的模型进行回归分析。当面对一个非线性模型的时候，我们本能想到的是通过添加一些非线性的特征（多项式），进而表征更高维度的特征，同时带来的就是本身已经不是线性模型了。然而通过添加多项式有时又会存在过拟合的现象，如果不添加多项式，引入更高维度的特征，面临的问题就是欠拟合。而我们更需要一个算法能够自动识别并添加合适的多项式，但是，根据我们之前学过的线性回归模型，哪个模型能够达到这样的目的呢？</p>
+<h1 id="2、-解决方法"><a href="#2、-解决方法" class="headerlink" title="2、 解决方法"></a>2、 解决方法</h1><p>根据上面的问题，结合我们之前学过的线性回归模型。历史上伟大的科学家提出采用局部权重的方式进行拟合。本质思想就是，在非线性模型中如果想通过线性回归解决问题，那么必须要使用局部线性权重回归进行回归分析，就算是非线性回归模型，在非常小的区间内这个模型也是一个线性的回归模型。基于此，提出了通过使用样本集中在局部进行局部线性权重回归分析。</p>
+<h1 id="3、实现方法"><a href="#3、实现方法" class="headerlink" title="3、实现方法"></a>3、实现方法</h1><p>在线性回归模型分析中，我们的损失函数为：Σi(y(i)-θT*x)^2，我们之前通过最小二乘法以及概率方面的解释已经阐述清楚。现在局部线性权重回归分析中，损失函数更新为：Σiw(i)(y(i)-θT·x)^2。其中w(i)为非负权重值，但是这个值的选择需要非常注意。如果w(i)过小，那么就会使得损失函数中的损失项变得过于小，如果w(i)过大，就要非常努利降低损失函数。因此，我们选择w(i)=exp(-(x(i)-x)/2k^2)，k参数的意义就是高斯核，如果k选取过下就是使得整个w(i)偏大，导致欠拟合。如果k过小就会使得w(i)偏小，会出现过拟合。这个w(i)的形状类似与高斯函数，但是和高斯函数本身一点关系都没有，这里的k就是表示距离选取点的距离。</p>
+<h1 id="4、注意事项"><a href="#4、注意事项" class="headerlink" title="4、注意事项"></a>4、注意事项</h1><p>局部权重线性回归模型本身是通过全部的训练集进行训练，这是一个非参数算法。因为，参数算法就像线性回归模型，通过训练集得出参数。进而对未知数据进行预测。但是，非参数算法就是每一个数据的参数都不一样，如果要对未知数据进行预测就需要对遍历整个数据集，这种做法非常浪费时间。</p>
+
+ 
+                <!-- Meta -->
+                <div class="post-meta">
+                    <hr>
+                    <br>
+                    <div class="post-tags">
+                        
+                    </div>
+                    <div class="post-date">
+                        2019 年 05 月 07 日
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comments -->
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <!-- Disqus Comments -->
+
+
+            </div>
+        </div>
+    </div>
+</article>
+</section>
+
+    <!-- Scripts -->
+    <!-- jQuery -->
+<script src="//cdn.bootcss.com/jquery/2.2.1/jquery.min.js"></script>
+<!-- Bootstrap -->
+<script src="//cdn.bootcss.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+<script type="text/javascript">
+	console.log('Hexo-theme-hollow designed by zchen9 🙋 © 2015-' + (new Date()).getFullYear());
+</script>
+
+    <!-- Google Analytics -->
+    
+
+</body>
+
+</html>
